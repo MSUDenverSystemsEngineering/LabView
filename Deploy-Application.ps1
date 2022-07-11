@@ -124,6 +124,19 @@ Try {
 		Show-InstallationProgress -StatusMessage "Installing NI LabVIEW"
 
 		## <Perform Pre-Installation tasks here>
+		If (Test-Path -Path "$envProgramFiles\National Instruments\LabVIEW 2017\LabVIEW.exe") {
+			Show-InstallationPrompt -Title "NI Uninstall" -Message "An older version of LabVIEW has been detected. In order to install LabVIEW 2020, ALL NI products including Multisim, Ultiboard, and LabVIEW will need to be uninstalled.`n`n(Uninstall will proceed automatically in 30 seconds.)`n`nDo you want to proceed?" -ButtonRightText "Cancel" -ButtonLeftText "Continue" -Timeout 30 -ExitOnTimeout $False -OutVariable out
+			if ($out -eq "Cancel") {
+				Exit-Script
+				$MainExitCode = 2
+			}
+			else {
+				Write-Log -Message 'National Instruments software was detected. Will be uninstalled.' -Source $deployAppScriptFriendlyName
+				Show-InstallationProgress -StatusMessage 'Uninstalling previous versions of National Instruments software...'
+				Execute-Process -Path "$envProgramFiles\National Instruments\Shared\NIUninstaller\uninst.exe" -Parameters '/qb /x all /log ni.txt' -WindowStyle 'Hidden' -IgnoreExitCodes '3010' -ContinueonError $True
+				Execute-Process -Path "$envProgramFilesx86\National Instruments\Shared\NIUninstaller\uninst.exe" -Parameters '/qb /x all /log ni.txt' -WindowStyle 'Hidden' -IgnoreExitCodes '3010' -ContinueonError $True
+			}
+		}
 
 
 		##*===============================================
@@ -188,7 +201,7 @@ Try {
 
 		## <Perform Uninstallation tasks here>
 
-		Show-InstallationPrompt -Title "NI Uninstall" -Message "Continuing with this uninstallation will uninstall ALL NI products including Multisim. Ultiboard, LabVIEW and the NI Package Manager.`n`n(Uninstall will proceed automatically in 30 seconds.)`n`nDo you want to proceed?" -ButtonRightText "Cancel" -ButtonLeftText "Continue" -Timeout 30 -ExitOnTimeout $False -OutVariable out
+		Show-InstallationPrompt -Title "NI Uninstall" -Message "Continuing with this uninstallation will uninstall ALL NI products including Multisim, Ultiboard, LabVIEW and the NI Package Manager.`n`n(Uninstall will proceed automatically in 30 seconds.)`n`nDo you want to proceed?" -ButtonRightText "Cancel" -ButtonLeftText "Continue" -Timeout 30 -ExitOnTimeout $False -OutVariable out
 
 		if ($out -eq "Cancel") {
 			Exit-Script
@@ -266,8 +279,8 @@ Catch {
 # SIG # Begin signature block
 # MIImVgYJKoZIhvcNAQcCoIImRzCCJkMCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCC6ZCR1hvkXH+ta
-# 9XtblcEa/YKKA/N9vNovWqeNglMOBKCCH8EwggVvMIIEV6ADAgECAhBI/JO0YFWU
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCCGxu2bglWBAi3b
+# KT2zSnFcY9G4j0GXySLGQcur/lslUKCCH8EwggVvMIIEV6ADAgECAhBI/JO0YFWU
 # jTanyYqJ1pQWMA0GCSqGSIb3DQEBDAUAMHsxCzAJBgNVBAYTAkdCMRswGQYDVQQI
 # DBJHcmVhdGVyIE1hbmNoZXN0ZXIxEDAOBgNVBAcMB1NhbGZvcmQxGjAYBgNVBAoM
 # EUNvbW9kbyBDQSBMaW1pdGVkMSEwHwYDVQQDDBhBQUEgQ2VydGlmaWNhdGUgU2Vy
@@ -441,32 +454,32 @@ Catch {
 # ZDErMCkGA1UEAxMiU2VjdGlnbyBQdWJsaWMgQ29kZSBTaWduaW5nIENBIFIzNgIR
 # AKVN33D73PFMVIK48rFyyjEwDQYJYIZIAWUDBAIBBQCggYQwGAYKKwYBBAGCNwIB
 # DDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEE
-# AYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQg29ET8a7C++F3
-# 7K3ahqlkRBb2JFYbzq9Wu6xNmuoQ1o0wDQYJKoZIhvcNAQEBBQAEggGAixpjNdju
-# gJE1hyfP9y9aNYRl4/KcHaN0Ul9H9qd0lwUZLD4Z528Oe0hVxw0++7LJ2A0pjGg1
-# 264cawp+fFCqqy8JyYpPenlsSzy5jWErdi3mM9eHMwWjk1kK7WBCmzd6YJ9ht+Kg
-# ScJIGbfg7r7Rhrclex57J7d1qR2RQes5gXGELyNoJYZxowq4WWUO5rghlHczWDbT
-# vuqvsJOrjctuhEfAGw4CWq7BTY+6QLRNaROeIJfZUcIgbX5DCOC8JTVbXBkq0Z3s
-# ncCkXwc7F5oyXuRuZ1I8kynWuWcPacXjZSnyOIwXMaRymiqOVqE1Q1+QwjMyLsZQ
-# /U5kRmlMBMAIWmzfUc6HOh6GEEvRMIpOVMkbkqNgjQlzH10+JnbnZ26WMeVq7taH
-# 8NiXf75xtk0trlvieRxgGnA9dG+v7O+X+gUeN3Kb3chPRp82h3wjqAA9RTsyDG6W
-# oohsYgsD820emQ2vA1BsWgxGTK0gwI5MCJKIQDPOECog3k1tGMUNq8AFoYIDTDCC
+# AYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQgTkq/FFX+Lvnp
+# ZDnXijdt26n3+uMGg7JPvdxIEyhJquowDQYJKoZIhvcNAQEBBQAEggGAlup9rGhF
+# IDaawX14j7bHQAHWNhap7h+y0f1rjGnYtp7d+074hHyWAchOLZpZD0LUT1joJx55
+# EGLi91E6EBIr0qGerZvti72BcSmYNxLiUgOORr7vcGNy0Jr0BdweOdguEbug6KlY
+# U8ewm7lzZiveB8myUBmYz8jiP7PY3RMDmHKwlt2BCElA/l7R1IdB2ycq3jAtxuxA
+# 4QMD/XhtYqduHeyIeGUTfbAWbZEmLVOf2nhkKO61rEKCBjG7iHXAzQTJ/b/+Krcj
+# 0tOpb4scj3HzBRGvj2Stn3MjMq5C6nP+X+eCB7N9DvGfEGcCc6NFVtkFN7w6F2PX
+# rz3IsIQ0/MvX6B3dvK1JOpnsjt0yvNvsVqu+2hqSbA6wqt7V7TUG64zj3LrU9ZD+
+# nrphYr1myMGPezCOOzYIXQUsNvbqupznpbG+dlzYNu/maRzu+pR+FTDZyawiWbpj
+# dmvAFpVs2c0UGCKYbmforOagt4ZFjj+vacykUWvky0NAY18/lRBIRWELoYIDTDCC
 # A0gGCSqGSIb3DQEJBjGCAzkwggM1AgEBMIGSMH0xCzAJBgNVBAYTAkdCMRswGQYD
 # VQQIExJHcmVhdGVyIE1hbmNoZXN0ZXIxEDAOBgNVBAcTB1NhbGZvcmQxGDAWBgNV
 # BAoTD1NlY3RpZ28gTGltaXRlZDElMCMGA1UEAxMcU2VjdGlnbyBSU0EgVGltZSBT
 # dGFtcGluZyBDQQIRAJA5f5rSSjoT8r2RXwg4qUMwDQYJYIZIAWUDBAICBQCgeTAY
-# BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yMjA3MDgx
-# ODQxMThaMD8GCSqGSIb3DQEJBDEyBDBywCzVIeQ5dCqUI5Ci7cUpfVV4IcHd3qaw
-# lYhY2vqRecmD6QzsxTr/i7dGx69FIB8wDQYJKoZIhvcNAQEBBQAEggIAWpsSBdH5
-# Gl4GZGZBkFDIBnx8SWNl2FKzJOmhXJVJPnazuypUuKe5AcNQQBRvBQFZAEUufj5k
-# hfFt5lKAZ3zzhpDTiDpkaGabr0tommt53533guv48jeD8X9cJ086JlDKEaeZmWWf
-# qLQSqjMobS8eD5w05uC9coffTz6xKp/OY2hLB7ATV+Aj1Apr0XzlhFrhw5uGVcz4
-# Dg4VAC/2C7ubLKheiNegY4zzHumxT7UMB51PLZmVHrVm7SANrk3VpTAOXloG8d2E
-# Vv/CQIhZDPhNuOIQjwrgkWCAWWoOZvxIRQ5crzZESLWggSCV+ePbx9Ocw8SzKxbk
-# 5oeRMhc2KIZGauWUMFcbQSTSCtG8NdGSMYhI+WPbc+4Axk1cEP6w0WFtzLPrFakX
-# TRaKMRM/63i1cB52rflIYQphDMkMHgsxreKFXmrC3VZf19DxxOlVUm05jt+CTtS6
-# hx8AuybFstz/jjTmyaRbVpWBnpjta1bkLzCYGIcdAcO6AniUd3FHwH1nZe+i0m5B
-# 5/vCRSKTzhUFlS3YV3BWUQ5GsIYspZxNiZ9PxQdJptxupppb7wAcZAdt9IIAAj33
-# bHuRxoBfh5VSvf8jM/ZbHVG6wOVDx2EUgcVr1+t9coPle9GR9WPn1+oqLPd5YbSp
-# 4S7S/wpa2i8AX/hw1+PspSJ4Rg7uDNXE1ZA=
+# BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yMjA3MTEy
+# MjMwNTJaMD8GCSqGSIb3DQEJBDEyBDALCw4Hs9wQ8EYE6Lvwr3BVcma592y6llWC
+# LHGWulp7YHxw809YRuzec4CCOsxcSZgwDQYJKoZIhvcNAQEBBQAEggIAMCimnzCb
+# Er3/6Nkh8/Q3xA4qD1X5XLMsIM9PPooQd0C44KjQc17Yy4MC3LA/3sDvjx5CtGFD
+# IU/FRbeVCIW6UxtN6wnlZl9x8DyCINZsRgMANNflvQEugbyH5B52OLOA2y0jYe2Y
+# pYa9iWcORBL/mgchk29YZ+RUTboUB4A4d6zA1LeFgh8wIYhVR7DySUkogtAQRo+D
+# MiSqArt4qIJsjr+xXUgsZcemQU4yfWD3XcDj0nyxp6ZjakXaNNdWofF2EW3ZQ1T8
+# PX3nOU802noakeYOtO5x/KVmMtSd0MhHyEJmGEPPMscfoSSGdZ+bU/Jmwps6L8/w
+# BczlG7Oo7X6otc4upc3e89IHRouiKlaF9dUA3w7jrc1WHZxRIehVQLsQGhG7YQ81
+# gb53yJJVq3thpT5meNX+/CB7w0eGC570iUz9sikDfeSJk/iVaodzCz3E0nRvdeaW
+# SK0I7d5uf4xPYJk4Bg6VwO03x9+K20JvF9y0J/x/9V1CBcHu1hi9A1E4e7MiOG7z
+# 957F5j0V/VRP0HsEIN9012n2PT/JAmFowFnUlIIWWkYjo6KnseRIgzJcEOT9nYyM
+# 1GSn2bjfn9vGL4xhIGCJq+LEb7kitWW8JMvNBi5oliXvYNObYVAEtjpqq33LApBu
+# UMRzgvSYdNoyYUe23b+v/qSE8m5+7WVZEjI=
 # SIG # End signature block
