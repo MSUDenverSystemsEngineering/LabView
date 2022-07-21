@@ -128,7 +128,7 @@ Try {
 			Show-InstallationPrompt -Title "NI Uninstall" -Message "An older version of LabVIEW has been detected. In order to install LabVIEW 2020, ALL NI products including Multisim, Ultiboard, and LabVIEW will need to be uninstalled.`n`n(Uninstall will proceed automatically in 30 seconds.)`n`nDo you want to proceed?" -ButtonRightText "Cancel" -ButtonLeftText "Continue" -Timeout 30 -ExitOnTimeout $False -OutVariable out
 			if ($out -eq "Cancel") {
 				Exit-Script
-				$MainExitCode = 2
+				$MainExitCode = 2j
 			}
 			else {
 				Write-Log -Message 'National Instruments software was detected. Will be uninstalled.' -Source $deployAppScriptFriendlyName
@@ -152,7 +152,9 @@ Try {
 
 		## <Perform Installation tasks here>
 
-		$mainExitCode = Execute-Process "$dirFiles\ni-labview-2020_20.0_suite_online_repack3.exe" -Parameters "--quiet --accept-eulas --prevent-reboot"
+		Show-InstallationProgress -StatusMessage "Installing NI LabVIEW"
+
+		$tempExitCode = Execute-Process "$dirFiles\ni-labview-2020_20.0_suite_online_repack3.exe" -Parameters "--quiet --accept-eulas --prevent-reboot" -IgnoreExitCodes "-125071" -PassThru
 
 		##*===============================================
 		##* POST-INSTALLATION
@@ -168,6 +170,10 @@ Try {
 		Remove-File -Path "$envCommonDesktop\VIPM Browser.lnk" -ContinueonError $True
 		#Add shortcut for NI Launcher
 		Copy-File -Path "$dirSupportFiles\NI Launcher.lnk" -Destination $envCommonDesktop
+		#Exit script and pass exit code
+		If ($tempExitCode.ExitCode -eq -125071) {
+			Exit-Script -ExitCode 3010
+			}
 
 		## Display a message at the end of the install
 		If (-not $useDefaultMsi) {}
@@ -279,8 +285,8 @@ Catch {
 # SIG # Begin signature block
 # MIImVgYJKoZIhvcNAQcCoIImRzCCJkMCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCCGxu2bglWBAi3b
-# KT2zSnFcY9G4j0GXySLGQcur/lslUKCCH8EwggVvMIIEV6ADAgECAhBI/JO0YFWU
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCANXQywx9jnos39
+# zwKniq2AWCkG1wt+rs3Lx1Gs/8SXU6CCH8EwggVvMIIEV6ADAgECAhBI/JO0YFWU
 # jTanyYqJ1pQWMA0GCSqGSIb3DQEBDAUAMHsxCzAJBgNVBAYTAkdCMRswGQYDVQQI
 # DBJHcmVhdGVyIE1hbmNoZXN0ZXIxEDAOBgNVBAcMB1NhbGZvcmQxGjAYBgNVBAoM
 # EUNvbW9kbyBDQSBMaW1pdGVkMSEwHwYDVQQDDBhBQUEgQ2VydGlmaWNhdGUgU2Vy
@@ -454,32 +460,32 @@ Catch {
 # ZDErMCkGA1UEAxMiU2VjdGlnbyBQdWJsaWMgQ29kZSBTaWduaW5nIENBIFIzNgIR
 # AKVN33D73PFMVIK48rFyyjEwDQYJYIZIAWUDBAIBBQCggYQwGAYKKwYBBAGCNwIB
 # DDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEE
-# AYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQgTkq/FFX+Lvnp
-# ZDnXijdt26n3+uMGg7JPvdxIEyhJquowDQYJKoZIhvcNAQEBBQAEggGAlup9rGhF
-# IDaawX14j7bHQAHWNhap7h+y0f1rjGnYtp7d+074hHyWAchOLZpZD0LUT1joJx55
-# EGLi91E6EBIr0qGerZvti72BcSmYNxLiUgOORr7vcGNy0Jr0BdweOdguEbug6KlY
-# U8ewm7lzZiveB8myUBmYz8jiP7PY3RMDmHKwlt2BCElA/l7R1IdB2ycq3jAtxuxA
-# 4QMD/XhtYqduHeyIeGUTfbAWbZEmLVOf2nhkKO61rEKCBjG7iHXAzQTJ/b/+Krcj
-# 0tOpb4scj3HzBRGvj2Stn3MjMq5C6nP+X+eCB7N9DvGfEGcCc6NFVtkFN7w6F2PX
-# rz3IsIQ0/MvX6B3dvK1JOpnsjt0yvNvsVqu+2hqSbA6wqt7V7TUG64zj3LrU9ZD+
-# nrphYr1myMGPezCOOzYIXQUsNvbqupznpbG+dlzYNu/maRzu+pR+FTDZyawiWbpj
-# dmvAFpVs2c0UGCKYbmforOagt4ZFjj+vacykUWvky0NAY18/lRBIRWELoYIDTDCC
+# AYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQgKACF+xLRYNOT
+# pCbXCUWw69HIPj3FVxMBZaF6WNDMW04wDQYJKoZIhvcNAQEBBQAEggGAKjO8wBTb
+# GPii85wxLX7THN80Boacb1BzTPeONS057jRyGlThBUafUiD0X11zuF98UWDbu8Fp
+# FR4IoPwtSIdQD8umi533lHbW+2yQQv7eOTCT+iPqCKjX30qRKfdyiDfC9jcDTZVQ
+# ZDJH1RtkME+s1X0A9dfaHC4nTWi6NYRr5+dWOwoE9ktBzbBytMLGevcpW4yM/KCV
+# XzN0LVB/GR0C5rGRjFlX2Bhu4e2DyAxgGLKj+VYuLtmBudILTXaVALfDfp8HBwiU
+# PFKBcCw6VtX3gMqR5iSYmcy59kqfgbVsUtoTEfY6OWrWYXEOcKlB5b4SEfwkoaF6
+# 8ARsz0pshmZzLPVvqZ/O8yMu0rdNpmA59B0OFkbH1dD3z5Jbjt3Tm4+oT4mFZPvO
+# 0C+mcpGVrhrSFVoeoTPtPcRw0TiBT84LU6igdny0AQyIyFsz5Du6HVTFFOze9AQw
+# dut4EehnZCDrvMXiyqJYvK+tF/lm8DGCEtlSDz7nzHtqN+U+g6mHJP7RoYIDTDCC
 # A0gGCSqGSIb3DQEJBjGCAzkwggM1AgEBMIGSMH0xCzAJBgNVBAYTAkdCMRswGQYD
 # VQQIExJHcmVhdGVyIE1hbmNoZXN0ZXIxEDAOBgNVBAcTB1NhbGZvcmQxGDAWBgNV
 # BAoTD1NlY3RpZ28gTGltaXRlZDElMCMGA1UEAxMcU2VjdGlnbyBSU0EgVGltZSBT
 # dGFtcGluZyBDQQIRAJA5f5rSSjoT8r2RXwg4qUMwDQYJYIZIAWUDBAICBQCgeTAY
-# BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yMjA3MTEy
-# MjMwNTJaMD8GCSqGSIb3DQEJBDEyBDALCw4Hs9wQ8EYE6Lvwr3BVcma592y6llWC
-# LHGWulp7YHxw809YRuzec4CCOsxcSZgwDQYJKoZIhvcNAQEBBQAEggIAMCimnzCb
-# Er3/6Nkh8/Q3xA4qD1X5XLMsIM9PPooQd0C44KjQc17Yy4MC3LA/3sDvjx5CtGFD
-# IU/FRbeVCIW6UxtN6wnlZl9x8DyCINZsRgMANNflvQEugbyH5B52OLOA2y0jYe2Y
-# pYa9iWcORBL/mgchk29YZ+RUTboUB4A4d6zA1LeFgh8wIYhVR7DySUkogtAQRo+D
-# MiSqArt4qIJsjr+xXUgsZcemQU4yfWD3XcDj0nyxp6ZjakXaNNdWofF2EW3ZQ1T8
-# PX3nOU802noakeYOtO5x/KVmMtSd0MhHyEJmGEPPMscfoSSGdZ+bU/Jmwps6L8/w
-# BczlG7Oo7X6otc4upc3e89IHRouiKlaF9dUA3w7jrc1WHZxRIehVQLsQGhG7YQ81
-# gb53yJJVq3thpT5meNX+/CB7w0eGC570iUz9sikDfeSJk/iVaodzCz3E0nRvdeaW
-# SK0I7d5uf4xPYJk4Bg6VwO03x9+K20JvF9y0J/x/9V1CBcHu1hi9A1E4e7MiOG7z
-# 957F5j0V/VRP0HsEIN9012n2PT/JAmFowFnUlIIWWkYjo6KnseRIgzJcEOT9nYyM
-# 1GSn2bjfn9vGL4xhIGCJq+LEb7kitWW8JMvNBi5oliXvYNObYVAEtjpqq33LApBu
-# UMRzgvSYdNoyYUe23b+v/qSE8m5+7WVZEjI=
+# BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yMjA3MjEx
+# NTE1MjRaMD8GCSqGSIb3DQEJBDEyBDCzhymf6TqZRTksFXZS128jkwC3o/B8PACg
+# KGvJ5u4Yt63mqt5MoIYVmmmUxvbf8xcwDQYJKoZIhvcNAQEBBQAEggIAHd1aO/Vz
+# mzVWOWE2Gpv5V9qVKNrBDipEF2Rr7XBQrUIRE5mvqu/qWuFDwFFu+Xq7c5CvaNQj
+# wZiYoeknTwAE4C4T+BcMDNaPdXN575c5Bf+8numEEd48P5RlSvcyKKNPI4fjv0Ib
+# FnWAKuZkgTk1sk8qmBIxBTL6bxf4G/00bqEAk9G85w88jGE2U7pv076Pd76pl6Hk
+# QaonUlOLQZCYB7kem/byO/gwN9IAgiH7FiFBa4ysc/DoFfOWiM6puewr9QhN1O03
+# uuurIdJ/Fl5fsBE50MTU9SRCoupUrca7PKJ36e1VSjoKShSbiLL0p7/iVfNPGKpF
+# tH813Gew+E7GJo1ZlYXpd9CsGGtXJf1/UiECFD+43ZrNXEiBdFAO4yx5XLIgFtGu
+# kC61x7gLA43hIKbXwezsC834O9cXEkfOACtCwgYD4mWpiqo08BlJOU/8UTavfhq1
+# Ytcd7yKA/JEYO7LIbJOqxEQoe711ucFe+oOIrHHS4f4xjyki/KVmei2l65/x8Qrv
+# db1e/njXDi+3L7iZo8dPI4ee4ipqEUyrJvBinPQ5u+K4B8ens5Q7HxOlhrrqZCR2
+# J5uHkBTch7XkfoWM8Kpma54RKTEmdN6cOfuAZeY9EASnCpfjSTj1noT2W1KVSmI7
+# 6/hGhu+P82d4cvMGKp1vxw97ubWeNfyRItw=
 # SIG # End signature block
